@@ -7,7 +7,7 @@ import 'package:http_requester/src/http_status_codes.dart';
 
 class HttpRequester {
   final _timeOut = const Duration(seconds: 30);
-  final cacheManager = APICacheManager();
+  APICacheManager? cacheManager;
   final http.Client client = http.Client();
 
   Future<HttpRequesterResponse> request({
@@ -22,13 +22,13 @@ class HttpRequester {
 
     if (payload.shouldCache) {
       final cacheExists =
-          await cacheManager.isAPICacheKeyExist(payload.urlWithQueryParams!);
-      if (cacheExists) {
+          await cacheManager?.isAPICacheKeyExist(payload.urlWithQueryParams!);
+      if (cacheExists ?? false) {
         final cacheModel =
-            await cacheManager.getCacheData(payload.urlWithQueryParams!);
+            await cacheManager?.getCacheData(payload.urlWithQueryParams!);
 
         final cacheExpired = _cacheExpired(
-          cacheModel,
+          cacheModel!,
           payload.invalidateCachesAfter,
         );
 
@@ -92,7 +92,7 @@ class HttpRequester {
 
   void _cacheResponse(String key, String data) async {
     final cacheModel = APICacheDBModel(key: key, syncData: data);
-    await cacheManager.addCacheData(cacheModel);
+    await cacheManager?.addCacheData(cacheModel);
   }
 
   // Future<APICacheDBModel?> _getValidCacheModel(
